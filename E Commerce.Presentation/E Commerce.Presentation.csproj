@@ -11,4 +11,11 @@
     <ProjectReference Include="..\E Commerce.Services Abstraction\E Commerce.Services Abstraction.csproj" />
   </ItemGroup>
 
+	<ItemGroup>
+		<FramworkReference Include="Microsoft.AspNetCore.App"/>	
+	</ItemGroup>
+
+	<ItemGroup>
+	  <PackageReference Include="Microsoft.AspNetCore.App" Version="2.2.8" />
+	</ItemGroup>	
 </Project>
