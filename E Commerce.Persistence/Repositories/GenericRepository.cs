@@ -5,12 +5,13 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace E_Commerce.Persistence.Repositories
 {
-    public class GenericRepository<TEntitty, TKey> : IGenericRepository<TEntitty, TKey> where TEntitty : BaseEntity<TKey>
+    public class GenericRepository<TEntity, TKey> : IGenericRepository<TEntity, TKey> where TEntity : BaseEntity<TKey>
     {
         private readonly StoreDbContext dbContext;
 
@@ -18,19 +19,34 @@ namespace E_Commerce.Persistence.Repositories
         {
             dbContext = _dbContext;
         }
-        public async Task AddAsync(TEntitty entity)
-               => await dbContext.Set<TEntitty>().AddAsync(entity);
+        public async Task AddAsync(TEntity entity)
+               => await dbContext.Set<TEntity>().AddAsync(entity);
+        public async Task<IEnumerable<TEntity>> GetAllAsync()
+                      => await dbContext.Set<TEntity>().ToListAsync();
 
-        public async Task<IEnumerable<TEntitty>> GetAllAsync()
-                      => await dbContext.Set<TEntitty>().ToListAsync();
+        public async Task<TEntity> GetByIdAsync(TKey id)
+                => await dbContext.Set<TEntity>().FindAsync(id);
 
-        public async Task<TEntitty> GetByIdAsync(TKey id)
-                => await dbContext.Set<TEntitty>().FindAsync(id);
+        public void Remove(TEntity entity)
+                 => dbContext.Set<TEntity>().Remove(entity);
 
-        public void Remove(TEntitty entity)
-                 => dbContext.Set<TEntitty>().Remove(entity);
+        public void Update(TEntity entity)
+               => dbContext.Set<TEntity>().Update(entity);
 
-        public void Update(TEntitty entity)
-               => dbContext.Set<TEntitty>().Update(entity);
+        public async Task<IEnumerable<TEntity>> GetAllAsync(ISpecifications<TEntity, TKey> specifications)
+        {
+
+            return await SpecificationsEvaluator.CreateQuery(dbContext.Set<TEntity>(), specifications).ToListAsync();
+        }
+
+        public async Task<TEntity> GetByIdAsync(ISpecifications<TEntity, TKey> specifications)
+        {
+            return await SpecificationsEvaluator.CreateQuery(dbContext.Set<TEntity>(), specifications).FirstOrDefaultAsync();
+        }
+
+        public async Task<int> CountAysnc(ISpecifications<TEntity, TKey> specifications)
+        {
+            return await SpecificationsEvaluator.CreateQuery( dbContext.Set<TEntity>() , specifications ).CountAsync();
+        }
     }
 }

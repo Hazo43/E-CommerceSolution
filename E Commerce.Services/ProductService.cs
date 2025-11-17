@@ -2,7 +2,9 @@
 using E_Commerce.Domain.Entites.ProductModule;
 using E_Commerce.Domain.Entities.ProductModule;
 using E_Commerce.Domain.Intreface;
+using E_Commerce.Services.Specifications;
 using E_Commerce.Services_Abstraction;
+using E_Commerce.Shared;
 using E_Commerce.Shared.DTOs.ProductDTOs;
 using System;
 using System.Collections.Generic;
@@ -22,6 +24,7 @@ namespace E_Commerce.Services
             unitOfWork = _unitOfWork;
             mapper = _mapper;
         }
+
         public async Task<IEnumerable<BrandDTO>> GetAllBrandAsync()
         {
             var Brands = await unitOfWork.GetRepository<ProductBrand , int>().GetAllAsync();
@@ -30,12 +33,21 @@ namespace E_Commerce.Services
             return mapper.Map<IEnumerable<BrandDTO>>(Brands);
         }
 
-        public async Task<IEnumerable<ProductDTO>> GetAllProductsAsync()
+        public async Task<PaginatedResult<ProductDTO>> GetAllProductsAsync(ProductQueryParams queryParams)
         {
-            var products = await unitOfWork.GetRepository<Product, int>().GetAllAsync();
+            // Specifications => Get All Products Including Product Type and Product Brand
+            // And Filter With BrandId Or TypeId If Needed
 
+            var spec = new ProductWithTypeAndBrandSpecifications(queryParams);
+
+            var products = await unitOfWork.GetRepository<Product, int>().GetAllAsync(spec);
             // ProductDTO الي Product هحول من
-            return mapper.Map<IEnumerable<ProductDTO>>(products);
+            var DataToReturn = mapper.Map<IEnumerable<ProductDTO>>(products);  // اللي راجعه Product دي شايله كل ال
+            var CountOfReturnedData = DataToReturn.Count();      // Product بتاع كل ال Count دي شايله مجموع او ال
+            var CountSpec = new ProductCountSpecifications(queryParams);
+            var CountOfAllProducts = await unitOfWork.GetRepository<Product, int>().CountAysnc(CountSpec);
+            //                                            (  PageIndex   ,  PageSize  ,         Count ,                 Data )
+            return new PaginatedResult<ProductDTO>(queryParams.PageIndex, CountOfReturnedData, CountOfAllProducts, DataToReturn);
         }
 
         public async Task<IEnumerable<TypeDTO>> GetAllTypeAsyncc()
@@ -48,8 +60,10 @@ namespace E_Commerce.Services
 
         public async Task<ProductDTO> GetProductByIdAsync(int id)
         {
-            var product = await unitOfWork.GetRepository<Product , int>().GetByIdAsync(id);
-           
+            // Specification -> Get Producr By [Id] Including [ ProductType And ProductBrand ]
+            var spec = new ProductWithTypeAndBrandSpecifications(id);
+
+            var product = await unitOfWork.GetRepository<Product , int>().GetByIdAsync(spec);
             // ProductDTO  الي Product هحول من
             return mapper.Map<ProductDTO>(product);
         }
