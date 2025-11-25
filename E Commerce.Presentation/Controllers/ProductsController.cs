@@ -1,4 +1,5 @@
-﻿using E_Commerce.Services_Abstraction;
+﻿using E_Commerce.Presentation.Attributes;
+using E_Commerce.Services_Abstraction;
 using E_Commerce.Shared;
 using E_Commerce.Shared.DTOs.ProductDTOs;
 using Microsoft.AspNetCore.Mvc;
@@ -25,6 +26,7 @@ namespace E_Commerce.Presentation.Controllers
         // GetAllProducts
 
         [HttpGet]
+        [RedisCache]
         // GET : BaseUrl/api/Products [brandId? or typeId?] 
         public async Task<ActionResult<PaginatedResult<ProductDTO>>> GetAllProducts([FromQuery]ProductQueryParams queryParams)
         {
@@ -38,8 +40,10 @@ namespace E_Commerce.Presentation.Controllers
         // GET : BaseUrl/api/Products/id
         public async Task<ActionResult<ProductDTO>> GetBroductById(int id)
         {
-            var products = await productService.GetProductByIdAsync(id);
-            return Ok(products);
+                
+                var products = await productService.GetProductByIdAsync(id);
+                return Ok(products);
+       
         }
 
         // GetAllProductTypes

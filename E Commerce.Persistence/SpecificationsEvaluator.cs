@@ -31,7 +31,19 @@ namespace E_Commerce.Persistence
                 {
                     // Query =>  dbcontext.Products.Where()
                     Query = Query.Where(specifications.Criteria);
-                } 
+                }
+
+                // OrderBy 
+                if (specifications.OrderBy is not null)
+                {
+                    Query = Query.OrderBy(specifications.OrderBy);
+                }
+
+                // OrderBySescending 
+                if (specifications.OrderByDescending is not null)
+                {
+                    Query = Query.OrderBy(specifications.OrderByDescending);
+                }
 
                 // Include 
                 // و لو فيه اي عنصر روح اعمل اللي بقولك عليه null لو مش ب 
@@ -55,19 +67,8 @@ namespace E_Commerce.Persistence
                     // .Include(P => P.ProductBrand) 
                     //  dbcontext.Products.Include(P => P.ProductType).Include(P => P.ProductBrand) 
                 }
-            
-                // OrderBy 
-                if(specifications.OrderBy is not null)
-                {
-                    Query = Query.OrderBy(specifications.OrderBy);
-                }
 
-                // OrderBySescending 
-                if(specifications.OrderByDescending is not null)
-                {
-                    Query = Query.OrderBy(specifications.OrderByDescending);
-                }
-
+                // Take - Skip
                 if(specifications.IsPaginated == true)
                 {
                     Query = Query.Skip(specifications.Skip).Take(specifications.Take);

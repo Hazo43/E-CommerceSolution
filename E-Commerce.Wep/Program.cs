@@ -3,15 +3,20 @@ using E_Commerce.Domain.Interface;
 using E_Commerce.Domain.Intreface;
 using E_Commerce.Persistence.Data.DataSeed;
 using E_Commerce.Persistence.Data.DbContexts;
+using E_Commerce.Persistence.Repositories;
 using E_Commerce.Persistence.UnitOfWork;
 using E_Commerce.Services;
 using E_Commerce.Services.MappingProfile;
 using E_Commerce.Services_Abstraction;
+using E_Commerce.Wep.CustomMiddleWares;
 using E_Commerce.Wep.Extentions;
+using E_Commerce.Wep.Factories;
 using Microsoft.AspNetCore.DataProtection.KeyManagement;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using StackExchange.Redis;
 using System.Threading.Tasks;
 
 namespace E_Commerce.Wep
@@ -40,6 +45,19 @@ namespace E_Commerce.Wep
             //ProductProfile => mappingProfile «··Ì «‰« ⁄«„·Ê ⁄‘«‰ ﬂœ« ÂÊ ÂÌ‘Ê› ﬂ· Õ«ÃÂ ›Ì «· mappingProfile ›Ì «· class ·«“„ ÌﬂÊ‰              
             builder.Services.AddAutoMapper( typeof(ProductProfile).Assembly);
             builder.Services.AddScoped<IProductService, ProductService>();
+            builder.Services.AddSingleton<IConnectionMultiplexer>(SP =>
+            {
+                return ConnectionMultiplexer.Connect(builder.Configuration.GetConnectionString("RedisConnection")!);
+            });
+            builder.Services.AddScoped<IBasketRepository, BasketRepository>();
+            builder.Services.AddScoped<IBasketService , BasketService>();
+            builder.Services.AddScoped<ICacheRepository, CacheRepository>();
+            builder.Services.AddScoped<ICacheService, CacheService>();
+          
+            builder.Services.Configure<ApiBehaviorOptions>(options =>
+            {
+                options.InvalidModelStateResponseFactory = ApiResponseFactory.GenerateApiValidationResponse;
+            });
             #endregion
 
 
@@ -66,6 +84,7 @@ namespace E_Commerce.Wep
 
             #region Configure the HTTP request pipeline.
 
+            app.UseMiddleware<ExceptionHandlerMiddleWare>();
 
             if (app.Environment.IsDevelopment())
             {

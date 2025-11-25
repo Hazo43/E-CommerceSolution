@@ -2,6 +2,7 @@
 using E_Commerce.Domain.Entites.ProductModule;
 using E_Commerce.Domain.Entities.ProductModule;
 using E_Commerce.Domain.Intreface;
+using E_Commerce.Services.Exceptions;
 using E_Commerce.Services.Specifications;
 using E_Commerce.Services_Abstraction;
 using E_Commerce.Shared;
@@ -40,7 +41,7 @@ namespace E_Commerce.Services
 
             var spec = new ProductWithTypeAndBrandSpecifications(queryParams);
 
-            var products = await unitOfWork.GetRepository<Product, int>().GetAllAsync(spec);
+            var products = await unitOfWork.GetRepository<Product, int>().GetAllWithSpecificationsAsync(spec);
             // ProductDTO الي Product هحول من
             var DataToReturn = mapper.Map<IEnumerable<ProductDTO>>(products);  // اللي راجعه Product دي شايله كل ال
             var CountOfReturnedData = DataToReturn.Count();      // Product بتاع كل ال Count دي شايله مجموع او ال
@@ -62,8 +63,9 @@ namespace E_Commerce.Services
         {
             // Specification -> Get Producr By [Id] Including [ ProductType And ProductBrand ]
             var spec = new ProductWithTypeAndBrandSpecifications(id);
-
-            var product = await unitOfWork.GetRepository<Product , int>().GetByIdAsync(spec);
+            var product = await unitOfWork.GetRepository<Product , int>().GetByIdWithSpecificationsAsync(spec);
+            if (product is null)
+                throw new ProductNotFoundException(id);
             // ProductDTO  الي Product هحول من
             return mapper.Map<ProductDTO>(product);
         }

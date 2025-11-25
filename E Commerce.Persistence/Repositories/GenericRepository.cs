@@ -33,13 +33,13 @@ namespace E_Commerce.Persistence.Repositories
         public void Update(TEntity entity)
                => dbContext.Set<TEntity>().Update(entity);
 
-        public async Task<IEnumerable<TEntity>> GetAllAsync(ISpecifications<TEntity, TKey> specifications)
+        public async Task<IEnumerable<TEntity>> GetAllWithSpecificationsAsync(ISpecifications<TEntity, TKey> specifications)
         {
 
             return await SpecificationsEvaluator.CreateQuery(dbContext.Set<TEntity>(), specifications).ToListAsync();
         }
 
-        public async Task<TEntity> GetByIdAsync(ISpecifications<TEntity, TKey> specifications)
+        public async Task<TEntity> GetByIdWithSpecificationsAsync(ISpecifications<TEntity, TKey> specifications)
         {
             return await SpecificationsEvaluator.CreateQuery(dbContext.Set<TEntity>(), specifications).FirstOrDefaultAsync();
         }
