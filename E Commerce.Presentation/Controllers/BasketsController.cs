@@ -10,9 +10,8 @@ using System.Threading.Tasks;
 
 namespace E_Commerce.Presentation.Controllers
 {
-    [ApiController]
-    [Route("api/[Controller]")]
-    public class BasketsController : ControllerBase
+
+    public class BasketsController : ApiBaseController
     {
         private readonly IBasketService basketService;
 
@@ -26,7 +25,7 @@ namespace E_Commerce.Presentation.Controllers
         public async Task<ActionResult<BasketDTO>> GetBasket(string id)
         {
             var Basket = await basketService.GetBasketAsync(id);
-            return Ok(Basket);
+            return HandleResult<BasketDTO>(Basket);
         }
         // POST : // BaseUrl/api/Baskets 
         [HttpPost]

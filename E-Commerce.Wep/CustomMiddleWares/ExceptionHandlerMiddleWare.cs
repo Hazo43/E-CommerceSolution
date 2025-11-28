@@ -21,7 +21,7 @@ namespace E_Commerce.Wep.CustomMiddleWares
                 // دا لو  كل حاجه صح هيبدا ان هز يعمل استدعاء لكل اللي بعتها و تمشي واجده واحده 
                await _next.Invoke(httpContext);
                // EndPoint دا هيتنفذ في حاله انو معرفش يوصل ل
-                if( httpContext.Response.StatusCode == StatusCodes.Status404NotFound)
+                if( httpContext.Response.StatusCode == StatusCodes.Status404NotFound && !httpContext.Response.HasStarted) // 
                 {
                     var Problem = new ProblemDetails()
                     {

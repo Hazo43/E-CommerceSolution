@@ -1,8 +1,11 @@
 
+using E_Commerce.Domain.Entities.IdentityModule;
 using E_Commerce.Domain.Interface;
 using E_Commerce.Domain.Intreface;
 using E_Commerce.Persistence.Data.DataSeed;
 using E_Commerce.Persistence.Data.DbContexts;
+using E_Commerce.Persistence.IdentityData.DataSeed;
+using E_Commerce.Persistence.IdentityData.DbContext;
 using E_Commerce.Persistence.Repositories;
 using E_Commerce.Persistence.UnitOfWork;
 using E_Commerce.Services;
@@ -12,6 +15,7 @@ using E_Commerce.Wep.CustomMiddleWares;
 using E_Commerce.Wep.Extentions;
 using E_Commerce.Wep.Factories;
 using Microsoft.AspNetCore.DataProtection.KeyManagement;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
@@ -38,8 +42,9 @@ namespace E_Commerce.Wep
             {
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
             });
-            // Data Seed
-            builder.Services.AddScoped<IDataInitializer ,  DataInitializer>();
+            // Data Seed  ///////////////////////////////////// 
+            builder.Services.AddKeyedScoped<IDataInitializer ,  DataInitializer>("Default");
+            builder.Services.AddKeyedScoped<IDataInitializer, IdentityDataInitializer>("Identity");
             builder.Services.AddScoped<IUnitOfWork , UnitOfWork>();
             // Mapper
             //ProductProfile => mappingProfile «··Ì «‰« ⁄«„·Ê ⁄‘«‰ ﬂœ« ÂÊ ÂÌ‘Ê› ﬂ· Õ«ÃÂ ›Ì «· mappingProfile ›Ì «· class ·«“„ ÌﬂÊ‰              
@@ -58,6 +63,17 @@ namespace E_Commerce.Wep
             {
                 options.InvalidModelStateResponseFactory = ApiResponseFactory.GenerateApiValidationResponse;
             });
+            // 
+            builder.Services.AddDbContext<StoreIdentityDbContext>(options =>
+            {
+                options.UseSqlServer(builder.Configuration.GetConnectionString("IdentityConnection"));
+            });
+             // 
+            builder.Services.AddIdentityCore<ApplicationUser>()
+                            .AddRoles<IdentityRole>()
+                            .AddEntityFrameworkStores<StoreIdentityDbContext>();
+
+            builder.Services.AddScoped<IAuthenticationService , AuthenticationService>();
             #endregion
 
 
@@ -66,8 +82,9 @@ namespace E_Commerce.Wep
             #region Data Seeding
 
            await app.MigrateDatabaseAsync();
-
+           await app.MigrateIdentityDatabaseAsync();
            await app.SeedDatabaseAsync();
+           await app.SeedIdentityDatabaseAsync();
 
             //using var Scop = app.Services.CreateScope();
             //// Check Migrations 

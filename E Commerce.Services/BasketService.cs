@@ -3,12 +3,15 @@ using E_Commerce.Domain.Entities.BasketModule;
 using E_Commerce.Domain.Intreface;
 using E_Commerce.Services.Exceptions;
 using E_Commerce.Services_Abstraction;
+using E_Commerce.Shared.CommonResult;
 using E_Commerce.Shared.DTOs.BasketDTOs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+using Error = E_Commerce.Shared.CommonResult.Error;
 
 namespace E_Commerce.Services
 {
@@ -37,12 +40,12 @@ namespace E_Commerce.Services
            return await basketRepository.DeleteBasketAsync(id);
         }
 
-        public async Task<BasketDTO> GetBasketAsync(string id)
+        public async Task<Result<BasketDTO>> GetBasketAsync(string id)
         {
            var Basket = await basketRepository.GetBasketAsync(id);
             if (Basket is null)
-                throw new BasketNotFoundException(id);
-           return mapper.Map<CustomerBasket , BasketDTO>(Basket);
+                return Error.NotFound(" Basket.NotFound", $" Basket With Id {id} Is Not Found");
+            return mapper.Map<CustomerBasket , BasketDTO>(Basket);
 
         }
     }
