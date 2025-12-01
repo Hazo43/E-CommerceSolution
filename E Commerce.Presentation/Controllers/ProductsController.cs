@@ -64,5 +64,6 @@ namespace E_Commerce.Presentation.Controllers
             var Brands = await productService.GetAllBrandAsync();
             return Ok(Brands);
         }
+     
     }
 }

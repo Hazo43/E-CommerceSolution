@@ -74,6 +74,7 @@ namespace E_Commerce.Wep
                             .AddEntityFrameworkStores<StoreIdentityDbContext>();
 
             builder.Services.AddScoped<IAuthenticationService , AuthenticationService>();
+            builder.Services.AddScoped<IOrderService , OrderService>();
             #endregion
 
 

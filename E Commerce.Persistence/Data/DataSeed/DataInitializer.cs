@@ -1,9 +1,11 @@
 ﻿using E_Commerce.Domain.Entites;
 using E_Commerce.Domain.Entites.ProductModule;
+using E_Commerce.Domain.Entities.OrderModule;
 using E_Commerce.Domain.Entities.ProductModule;
 using E_Commerce.Domain.Interface;
 using E_Commerce.Persistence.Data.DbContexts;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,9 +32,10 @@ namespace E_Commerce.Persistence.Data.DataSeed
                 var HasBrands = await dbContext.ProductBrands.AnyAsync();
                 var HasTypes = await dbContext.ProductTypes.AnyAsync();
                 var HasProducs = await dbContext.Products.AnyAsync();
+                var HasDeliverMethod = await dbContext.Set<DeliveryMethod>().AnyAsync();
 
                 /// لو فيهم داتا اطلع متكملش
-                if (HasBrands && HasTypes && HasProducs) return;
+                if (HasBrands && HasTypes && HasProducs && HasDeliverMethod) return;
 
                 // لو مفهمش بقا روح ضيف
                 if (!HasBrands)
@@ -45,7 +48,10 @@ namespace E_Commerce.Persistence.Data.DataSeed
 
                 if (!HasProducs)
                    await DataSeedFromJSONAsync<Product, int>("products.json", dbContext.Products);
-                
+
+                if (!HasDeliverMethod)
+                    await DataSeedFromJSONAsync<DeliveryMethod, int>("delivery.json", dbContext.Set<DeliveryMethod>());
+               
                 await dbContext.SaveChangesAsync();
 
             }
